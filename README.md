@@ -1,1 +1,1 @@
-# pharmacy-stock-and-billing
+# Pharmacy Stock and Billing
