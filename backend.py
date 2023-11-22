@@ -17,8 +17,13 @@ def get_all_items() -> list[dict]:
     return response
 
 
-def get_item_batches(item_code: str) -> list[dict]:
+def get_item_batches(item_code: str) -> list[Batch]:
     batches = session.query(Batch).filter(Batch.item_code == item_code)
+    return batches
+
+
+def get_batched_by_exp(exp_date: date) -> list[Batch]:
+    batches = session.query(Batch).filter(Batch.exp_date <= exp_date)
     return batches
 
 
