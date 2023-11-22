@@ -29,6 +29,9 @@ def get_all_bills() -> list[dict]:
         "customer_name": bill.customer_name,
         "bill_json": json.loads(bill.bill_json),
         "total_amount": str(bill.total_amount),
+        "discount": str(bill.discount),
+        "net_amount": str(bill.net_amount),
+        "payment_type": bill.payment_type,
         "bill_date": bill.bill_date.strftime("%Y-%m-%d %H:%M:%S")
     } for bill in bills]
     return response

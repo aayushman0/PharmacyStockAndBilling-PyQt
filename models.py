@@ -51,6 +51,9 @@ class Bill(BaseModel):
     customer_name = Column("name", String(64))
     bill_json = Column("bill_json", String)
     total_amount = Column("total_amount", Float)
+    discount = Column("discount", Float)
+    net_amount = Column("net_amount", Float)
+    payment_type = Column("payment_type", String(64))
     bill_date = Column("bill_date", DateTime)
 
     def __init__(self, customer_name, bill_json, total_amount, bill_date):
