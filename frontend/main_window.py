@@ -1,10 +1,12 @@
 from dotenv import dotenv_values
+from datetime import date
 from PyQt6.uic import loadUi
-from PyQt6.QtCore import QDate
-from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem
+from PyQt6.QtCore import QDate, QDateTime
+from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QComboBox, QSpinBox, QDoubleSpinBox, QDateEdit
+from PyQt6.QtWidgets import QAbstractSpinBox
 from PyQt6.QtGui import QColor
 
-from backend import create_item, create_batch, edit_item, edit_batch
+from backend import create_item, create_batch, create_bill, edit_item, edit_batch
 from backend import get_items, get_batches, get_bills, delete_item, delete_batch
 
 # For Type Hinting
@@ -79,6 +81,15 @@ class MainWindow(QMainWindow):
         self.button_add_batch: QtWidgets.QPushButton
 
         # Add Bill Page
+        self.input_customer_name: QtWidgets.QLineEdit
+        self.input_bill_date: QtWidgets.QDateTimeEdit
+        self.table_add_bill: QtWidgets.QTableWidget
+        self.button_add_next_item: QtWidgets.QPushButton
+        self.input_total_amount: QtWidgets.QDoubleSpinBox
+        self.input_discount: QtWidgets.QDoubleSpinBox
+        self.input_net_amount: QtWidgets.QDoubleSpinBox
+        self.input_payment_type: QtWidgets.QComboBox
+        self.button_add_bill: QtWidgets.QPushButton
 
         # Edit Item Page
         self.input_edit_code: QtWidgets.QComboBox
@@ -156,6 +167,9 @@ class MainWindow(QMainWindow):
         self.button_add_batch.clicked.connect(self.add_batch_button_clicked)
 
         # Add Bill Page
+        self.button_add_next_item.clicked.connect(self.add_next_item_button_clicked)
+        self.input_discount.valueChanged.connect(self.net_amount_updated)
+        self.button_add_bill.clicked.connect(self.add_bill_button_clicked)
 
         # Edit Item Page
         self.input_edit_code.activated.connect(self.edit_item_code_entered)
@@ -247,6 +261,84 @@ class MainWindow(QMainWindow):
             return None  # <----------------------------------------------------------------------------Enter warning msg here
         # <---------------------------------------------------------------------------------------------Enter success msg here
         self.reset_page_values("page_add_batch")
+
+    def add_next_item_button_clicked(self):
+        cell_particular = QComboBox()
+        cell_batch_no = QComboBox()
+        cell_mfg_date = QDateEdit()
+        cell_exp_date = QDateEdit()
+        cell_quantity = QSpinBox()
+        cell_price = QDoubleSpinBox()
+        cell_single_total = QDoubleSpinBox()
+
+        cell_particular.addItem(None, None)
+        cell_particular.setEditable(True)
+        for item in self.items_list:
+            cell_particular.addItem(item.get("name"), item.get("code"))
+        cell_mfg_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_mfg_date.setReadOnly(True)
+        cell_exp_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_exp_date.setReadOnly(True)
+        cell_quantity.setMaximum(9999999)
+        cell_quantity.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_price.setMaximum(9999999)
+        cell_price.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_price.setReadOnly(True)
+        cell_single_total.setMaximum(999999999)
+        cell_single_total.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_single_total.setReadOnly(True)
+
+        cell_particular.activated.connect(lambda: self.cell_particular_activated(row_count))
+        cell_batch_no.activated.connect(lambda: self.cell_batch_no_activated(row_count))
+        cell_quantity.valueChanged.connect(lambda: self.cell_quantity_updated(row_count))
+
+        row_count = self.table_add_bill.rowCount()
+        self.table_add_bill.insertRow(row_count)
+        for i, cell in enumerate([cell_particular, cell_batch_no, cell_mfg_date, cell_exp_date, cell_quantity, cell_price, cell_single_total]):
+            self.table_add_bill.setCellWidget(row_count, i, cell)
+
+    def cell_particular_activated(self, row_no):
+        code = self.table_add_bill.cellWidget(row_no, 0).currentData()
+        if not code:
+            return None
+        for batch in get_batches(item_code=code, obj=True):
+            if batch.exp_date > date.today().replace(day=1):
+                self.table_add_bill.cellWidget(row_no, 1).addItem(batch.batch_no, (batch.mfg_date, batch.exp_date, batch.price))
+        self.cell_batch_no_activated(row_no)
+
+    def cell_batch_no_activated(self, row_no):
+        data = self.table_add_bill.cellWidget(row_no, 1).currentData()
+        if not data:
+            return None
+        self.table_add_bill.cellWidget(row_no, 2).setDate(data[0])
+        self.table_add_bill.cellWidget(row_no, 3).setDate(data[1])
+        self.table_add_bill.cellWidget(row_no, 5).setValue(data[2])
+
+    def cell_quantity_updated(self, row_no):
+        quantity = self.table_add_bill.cellWidget(row_no, 4).value()
+        price = self.table_add_bill.cellWidget(row_no, 5).value()
+        self.table_add_bill.cellWidget(row_no, 6).setValue(quantity * price)
+
+        total = 0
+        for row_no in range(self.table_add_bill.rowCount()):
+            total += self.table_add_bill.cellWidget(row_no, 6).value()
+        self.input_total_amount.setValue(total)
+        self.net_amount_updated()
+
+    def net_amount_updated(self):
+        self.input_net_amount.setValue(self.input_total_amount.value() - self.input_discount.value())
+
+    def add_bill_button_clicked(self):
+        customer_name = self.input_customer_name.text()
+        bill_date = self.input_bill_date.dateTime().toPyDateTime()
+        total_amount = self.input_total_amount.value()
+        discount = self.input_discount.value()
+        net_amount = self.input_net_amount.value()
+        payment_type = self.input_payment_type.currentText()
+        bill_json = list()
+        create_bill(customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
+        # <---------------------------------------------------------------------------------------------Enter success msg here
+        self.reset_page_values("page_add_bill")
 
     def edit_item_code_entered(self):
         if not self.input_edit_code.currentText():
@@ -369,7 +461,13 @@ class MainWindow(QMainWindow):
                 self.input_exp_date.setDate(QDate.currentDate())
 
             case "page_add_bill":
-                pass
+                self.input_customer_name.setText("")
+                self.input_bill_date.setDateTime(QDateTime.currentDateTime())
+                self.table_add_bill.setRowCount(0)
+                self.input_total_amount.setValue(0)
+                self.input_discount.setValue(0)
+                self.input_net_amount.setValue(0)
+                self.input_payment_type.setCurrentIndex(0)
 
             case "page_edit_item":
                 self.input_edit_code.setCurrentIndex(0)

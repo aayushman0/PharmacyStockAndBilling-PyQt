@@ -35,7 +35,7 @@ def get_batches(item_code: str | None = None, exp_date: date | None = None, obj:
         "price": str(batch.price),
         "mfg_date": batch.mfg_date.strftime("%m/%Y"),
         "exp_date": batch.exp_date.strftime("%m/%Y"),
-        "color": (100, 20, 20) if batch.exp_date <= date.today().replace(day=1) else None
+        "color": (255, 225, 100) if batch.exp_date <= date.today().replace(day=1) else None
     } for batch in batches]
     return response
 
@@ -86,7 +86,7 @@ def create_batch(item_code: str, batch_no: str, quantity: int, price: float, mfg
     return batch
 
 
-def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, discount: float, net_amount: float, payment_type: str, bill_date: datetime) -> dict[str, str | list[dict]]:
+def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, discount: float, net_amount: float, payment_type: str, bill_date: datetime) -> Bill:
     bill = Bill(customer_name, json.dumps(bill_json), total_amount, discount, net_amount, payment_type, bill_date)
     session.add(bill)
 
@@ -104,18 +104,19 @@ def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, 
         else:
             batch.quantity -= quantity
     session.commit()
+    return bill
 
-    response = {
-        "id": str(bill.id),
-        "customer_name": bill.customer_name,
-        "bill_json": json.loads(bill.bill_json),
-        "total_amount": str(bill.total_amount),
-        "discount": str(bill.discount),
-        "net_amount": str(bill.net_amount),
-        "payment_type": bill.payment_type,
-        "bill_date": bill.bill_date.strftime("%Y-%m-%d %H:%M:%S")
-    }
-    return response
+    # response = {
+    #     "id": str(bill.id),
+    #     "customer_name": bill.customer_name,
+    #     "bill_json": json.loads(bill.bill_json),
+    #     "total_amount": str(bill.total_amount),
+    #     "discount": str(bill.discount),
+    #     "net_amount": str(bill.net_amount),
+    #     "payment_type": bill.payment_type,
+    #     "bill_date": bill.bill_date.strftime("%Y-%m-%d %H:%M:%S")
+    # }
+    # return response
 
 
 def edit_item(code: str, name: str, price: float, life_cycle: int) -> Item | str:
