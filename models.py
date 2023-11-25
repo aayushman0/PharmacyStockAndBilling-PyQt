@@ -28,14 +28,16 @@ class Batch(BaseModel):
     id = Column("id", Integer, primary_key=True, autoincrement=True)
     batch_no = Column("batch_no", String(100), index=True)
     quantity = Column("quantity", Integer)
+    price = Column("price", Float)
     mfg_date = Column("mfg_date", Date)
     exp_date = Column("exp_date", Date)
     item_code = Column(String(64), ForeignKey("item.code", ondelete="CASCADE"))
     item = relationship("Item", backref="batches")
 
-    def __init__(self, item_code, batch_no, quantity, mfg_date, exp_date):
+    def __init__(self, item_code, batch_no, quantity, price, mfg_date, exp_date):
         self.batch_no = batch_no
         self.quantity = quantity
+        self.price = price
         self.mfg_date = mfg_date
         self.exp_date = exp_date
         self.item_code = item_code
@@ -56,10 +58,13 @@ class Bill(BaseModel):
     payment_type = Column("payment_type", String(64))
     bill_date = Column("bill_date", DateTime)
 
-    def __init__(self, customer_name, bill_json, total_amount, bill_date):
+    def __init__(self, customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date):
         self.customer_name = customer_name
         self.bill_json = bill_json
         self.total_amount = total_amount
+        self.discount = discount
+        self.net_amount = net_amount
+        self.payment_type = payment_type
         self.bill_date = bill_date
 
     def __repr__(self):
