@@ -338,10 +338,10 @@ class MainWindow(QMainWindow):
         bill_json = list()
         for row in range(self.table_add_bill.rowCount()):
             row_json = {
-                "item_code": self.table_add_bill.cellWidget(row, 0).currentText(),
+                "item_name": self.table_add_bill.cellWidget(row, 0).currentText(),
                 "batch_no": self.table_add_bill.cellWidget(row, 1).currentText(),
-                "mfg_date": self.table_add_bill.cellWidget(row, 2).date().toString(),
-                "exp_date": self.table_add_bill.cellWidget(row, 3).date().toString(),
+                "mfg_date": self.table_add_bill.cellWidget(row, 2).date().toString("MM/yyyy"),
+                "exp_date": self.table_add_bill.cellWidget(row, 3).date().toString("MM/yyyy"),
                 "quantity": self.table_add_bill.cellWidget(row, 4).value(),
                 "price": self.table_add_bill.cellWidget(row, 5).value(),
                 "total": self.table_add_bill.cellWidget(row, 6).value()

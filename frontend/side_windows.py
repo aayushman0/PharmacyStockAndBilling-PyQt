@@ -1,7 +1,7 @@
-# import json
+import json
 from dotenv import dotenv_values
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QWidget, QMessageBox
+from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem
 from PyQt6.QtGui import QPainter
 from PyQt6.QtPrintSupport import QPrinter
 
@@ -40,6 +40,7 @@ class BillWindow(QWidget):
         self.discount: QtWidgets.QLabel
         self.net_total: QtWidgets.QLabel
 
+        self.table_bill_print: QtWidgets.QTableWidget
         self.button_print: QtWidgets.QPushButton
 
     def load_pharma_info(self):
@@ -58,6 +59,17 @@ class BillWindow(QWidget):
         self.bill_no.setText(f"Bill no.: {bill.id}")
         self.date.setText(f"Date: {bill.bill_date.strftime('%Y/%m/%d %H:%M')}")
         self.customer_name.setText(f"Name: {bill.customer_name}")
+
+        self.table_bill_print.setRowCount(0)
+        for i, row in enumerate(json.loads(bill.bill_json)):
+            self.table_bill_print.insertRow(i)
+            self.table_bill_print.setItem(i, 0, QTableWidgetItem(row.get("item_name")))
+            self.table_bill_print.setItem(i, 1, QTableWidgetItem(row.get("batch_no")))
+            self.table_bill_print.setItem(i, 2, QTableWidgetItem(row.get("exp_date")))
+            self.table_bill_print.setItem(i, 3, QTableWidgetItem(str(row.get("quantity"))))
+            self.table_bill_print.setItem(i, 4, QTableWidgetItem(str(row.get("price"))))
+            self.table_bill_print.setItem(i, 5, QTableWidgetItem(str(row.get("total"))))
+        self.table_bill_print.resizeColumnsToContents()
 
         self.total.setText(str(bill.total_amount))
         self.discount.setText(str(bill.discount))
