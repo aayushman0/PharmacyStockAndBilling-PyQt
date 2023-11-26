@@ -1,13 +1,14 @@
 from dotenv import dotenv_values
 from datetime import date
 from PyQt6.uic import loadUi
-from PyQt6.QtCore import QDate, QDateTime
+from PyQt6.QtCore import QDate, QDateTime, Qt
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QComboBox, QSpinBox, QDoubleSpinBox, QDateEdit
-from PyQt6.QtWidgets import QAbstractSpinBox
+from PyQt6.QtWidgets import QAbstractSpinBox, QPushButton
 from PyQt6.QtGui import QColor
 
 from backend import create_item, create_batch, create_bill, edit_item, edit_batch
 from backend import get_items, get_batches, get_bills, delete_item, delete_batch
+from .side_windows import show_message, BillWindow
 
 # For Type Hinting
 from PyQt6 import QtWidgets, QtGui
@@ -119,7 +120,7 @@ class MainWindow(QMainWindow):
     def load_menubar_logic(self):
         def change_screen(page_name):
             self.stacked_widget.setCurrentWidget(getattr(self, page_name))
-            self.reset_page_values(page_name)
+            getattr(self, f"reset_{page_name}")()
 
         change_screen("page_add_bill")
         self.action_add_item.triggered.connect(lambda: change_screen("page_add_item"))
@@ -132,24 +133,7 @@ class MainWindow(QMainWindow):
         self.action_edit_batch.triggered.connect(lambda: change_screen("page_edit_batch"))
 
     def load_page_logic(self):
-        # Load ComboBoxes with Items
-        self.input_batch_filter_code.addItem(None, None)
-        self.input_item_code.addItem(None, None)
-        self.input_edit_code.addItem(None, None)
-        self.input_edit_item_code.addItem(None, None)
-        for item in self.items_list:
-            self.input_batch_filter_code.addItem(item.get("code"), item.get("code"))
-            self.input_item_code.addItem(item.get("code"), (item.get("life_cycle"), item.get("price")))
-            self.input_edit_code.addItem(item.get("code"), item.get("code"))
-            self.input_edit_item_code.addItem(item.get("code"), item.get("code"))
-
         # Get All Items Page
-        for row in self.items_list:
-            row_count = self.table_item.rowCount()
-            self.table_item.insertRow(row_count)
-            for i, column in enumerate(row.values()):
-                self.table_item.setItem(row_count, i, QTableWidgetItem(column))
-        self.table_item.resizeColumnsToContents()
 
         # Get Batches Page
         self.button_batch_filter_reset.clicked.connect(self.batch_reset_button_clicked)
@@ -182,8 +166,8 @@ class MainWindow(QMainWindow):
         self.button_edit_batch.clicked.connect(self.edit_batch_saved)
         self.button_delete_batch.clicked.connect(self.edit_batch_deleted)
 
-    # -------------------Click Events--------------------
-    # ---------------------------------------------------
+    # --------------------------------------------Click Event---------------------------------------------
+    # ----------------------------------------------------------------------------------------------------
     def batch_reset_button_clicked(self):
         self.input_batch_filter_code.setCurrentIndex(0)
         self.input_batch_filter_date.setDate(QDate.currentDate())
@@ -229,13 +213,15 @@ class MainWindow(QMainWindow):
         price = self.input_price.value()
         lifecycle = self.input_lifecycle.value()
         if not (name and price):
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
+            show_message(title="Missing Value", message="One or more field is missing a value.")
+            return None
         response = create_item(name, price, lifecycle)
         if type(response) is str:
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
-        # <---------------------------------------------------------------------------------------------Enter success msg here
-        self.update_item_list(response)
-        self.reset_page_values("page_add_item")
+            show_message(title="Error", message=response)
+            return None
+        self.items_list.append(response)
+        self.reset_page_add_item()
+        show_message(title="Success", message=f"{response.get('code')} successfully created.")
 
     def add_batch_code_entered(self):
         if not self.input_item_code.currentData():
@@ -253,14 +239,16 @@ class MainWindow(QMainWindow):
         quantity = self.input_quantity.value()
         price = self.input_batch_price.value()
         if not (code and batch_no and quantity and price):
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
+            show_message(title="Missing Value", message="One or more field is missing a value.")
+            return None
         mfg_date = self.input_mfg_date.date().toPyDate()
         exp_date = self.input_exp_date.date().toPyDate()
         response = create_batch(code, batch_no, quantity, price, mfg_date, exp_date)
         if type(response) is str:
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
-        # <---------------------------------------------------------------------------------------------Enter success msg here
-        self.reset_page_values("page_add_batch")
+            show_message(title="Error", message=response)
+            return None
+        self.reset_page_add_batch()
+        show_message(title="Success", message=f"{response.get('batch_no')} successfully created.")
 
     def add_next_item_button_clicked(self):
         cell_particular = QComboBox()
@@ -271,22 +259,33 @@ class MainWindow(QMainWindow):
         cell_price = QDoubleSpinBox()
         cell_single_total = QDoubleSpinBox()
 
+        # -------------------------------------------------------------------------------- #
         cell_particular.addItem(None, None)
         cell_particular.setEditable(True)
         for item in self.items_list:
             cell_particular.addItem(item.get("name"), item.get("code"))
+        # -------------------------------------------------------------------------------- #
         cell_mfg_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         cell_mfg_date.setReadOnly(True)
+        cell_mfg_date.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # -------------------------------------------------------------------------------- #
         cell_exp_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         cell_exp_date.setReadOnly(True)
+        cell_exp_date.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # -------------------------------------------------------------------------------- #
         cell_quantity.setMaximum(9999999)
         cell_quantity.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        # -------------------------------------------------------------------------------- #
         cell_price.setMaximum(9999999)
         cell_price.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         cell_price.setReadOnly(True)
+        cell_price.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # -------------------------------------------------------------------------------- #
         cell_single_total.setMaximum(999999999)
         cell_single_total.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         cell_single_total.setReadOnly(True)
+        cell_single_total.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # -------------------------------------------------------------------------------- #
 
         cell_particular.activated.connect(lambda: self.cell_particular_activated(row_count))
         cell_batch_no.activated.connect(lambda: self.cell_batch_no_activated(row_count))
@@ -296,6 +295,7 @@ class MainWindow(QMainWindow):
         self.table_add_bill.insertRow(row_count)
         for i, cell in enumerate([cell_particular, cell_batch_no, cell_mfg_date, cell_exp_date, cell_quantity, cell_price, cell_single_total]):
             self.table_add_bill.setCellWidget(row_count, i, cell)
+        self.table_add_bill.cellWidget(row_count, 0).setFocus()
 
     def cell_particular_activated(self, row_no):
         code = self.table_add_bill.cellWidget(row_no, 0).currentData()
@@ -336,9 +336,9 @@ class MainWindow(QMainWindow):
         net_amount = self.input_net_amount.value()
         payment_type = self.input_payment_type.currentText()
         bill_json = list()
-        create_bill(customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
-        # <---------------------------------------------------------------------------------------------Enter success msg here
-        self.reset_page_values("page_add_bill")
+        bill = create_bill(customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
+        self.reset_page_add_bill()
+        self.show_bill_window(bill.id)
 
     def edit_item_code_entered(self):
         if not self.input_edit_code.currentText():
@@ -350,22 +350,34 @@ class MainWindow(QMainWindow):
         self.input_edit_price.setValue(float(response[0].get("price")))
         self.input_edit_lifecycle.setValue(int(response[0].get("life_cycle")))
 
-    def edit_item_saved(self):  # <------------------------------------------------------------------------WIP
+    def edit_item_saved(self):
         code = self.input_edit_code.currentData()
         if not code:
+            show_message(title="Missing Value", message="'Code' field is missing value.")
             return None
         name = self.input_edit_item_name.text()
         price = self.input_edit_price.value()
         lifecycle = self.input_edit_lifecycle.value()
-        edit_item(code, name, price, lifecycle)
-        self.reset_page_values("page_edit_item")
+        response = edit_item(code, name, price, lifecycle)
+        if type(response) is str:
+            show_message(title="Error", message=response)
+            return None
+        self.items_list = get_items()
+        self.reset_page_edit_item()
+        show_message(title="Success", message=f"{response.code} sucessfully updated.")
 
-    def edit_item_deleted(self):  # <----------------------------------------------------------------------WIP
+    def edit_item_deleted(self):
         code = self.input_edit_code.currentData()
         if not code:
+            show_message(title="Missing Value", message="'Code' field is missing value.")
             return None
-        delete_item(code)
-        self.reset_page_values("page_edit_item")
+        response = delete_item(code)
+        if type(response) is str:
+            show_message(title="Error", message=response)
+            return None
+        self.items_list = get_items()
+        self.reset_page_edit_item()
+        show_message(title="Success", message="Item sucessfully deleted.")
 
     def edit_batch_code_entered(self):
         if not self.input_edit_item_code.currentData():
@@ -385,7 +397,8 @@ class MainWindow(QMainWindow):
     def edit_batch_saved(self):
         code = self.input_edit_item_code.currentData()
         if not (code and self.input_edit_batch_no.count()):
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
+            show_message(title="Missing Value", message="One or more field is missing a value.")
+            return None
         batch_no = self.input_edit_batch_no.currentText()
         quantity = self.input_edit_quantity.value()
         price = self.input_edit_batch_price.value()
@@ -393,95 +406,121 @@ class MainWindow(QMainWindow):
         exp_date = self.input_edit_exp_date.date().toPyDate()
         response = edit_batch(code, batch_no, quantity, price, mfg_date, exp_date)
         if type(response) is str:
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
-        # <---------------------------------------------------------------------------------------------Enter success msg here
-        self.reset_page_values("page_edit_batch")
+            show_message(title="Error", message=response)
+            return None
+        self.reset_page_edit_batch()
+        show_message(title="Success", message=f"{response.batch_no} successfully edited.")
 
     def edit_batch_deleted(self):
         code = self.input_edit_item_code.currentData()
         if not (code and self.input_edit_batch_no.count()):
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
+            show_message(title="Missing Value", message="One or more field is missing a value.")
+            return None
         batch_no = self.input_edit_batch_no.currentText()
         response = delete_batch(code, batch_no)
         if type(response) is str:
-            return None  # <----------------------------------------------------------------------------Enter warning msg here
-        # <---------------------------------------------------------------------------------------------Enter success msg here
-        self.reset_page_values("page_edit_batch")
+            show_message(title="Error", message=response)
+            return None
+        self.reset_page_edit_batch()
+        show_message(title="Success", message="Batch successfully deleted.")
 
-    # --------------End of Click Events------------------
-    # ---------------------------------------------------
+    def show_bill_window(self, bill_id: int):
+        self.bill_window = BillWindow(bill_id)
+        self.bill_window.show()
 
-    def update_item_list(self, new_item: dict):
-        self.items_list.append(new_item)
-        row_count = self.table_item.rowCount()
-        self.table_item.insertRow(row_count)
-        for i, column in enumerate(new_item.values()):
-            self.table_item.setItem(row_count, i, QTableWidgetItem(column))
-        self.table_item.resizeColumnsToContents()
-        self.input_batch_filter_code.addItem(new_item.get("code"), new_item.get("code"))
-        self.input_item_code.addItem(new_item.get("code"), (new_item.get("life_cycle"), new_item.get("price")))
-        self.input_edit_code.addItem(new_item.get("code"), new_item.get("code"))
-        self.input_edit_item_code.addItem(new_item.get("code"), new_item.get("code"))
-
-    def reset_page_values(self, page_name: str):
+    # ------------------------------------------Reset Page Logic------------------------------------------
+    # ----------------------------------------------------------------------------------------------------
+    def reset_input_code_and_bill_table(self):
         self.current_lifecycle = 0
-        match page_name:
-            case "page_get_all_items":
-                pass
+        self.input_item_code.clear()
+        self.input_edit_code.clear()
+        self.input_edit_item_code.clear()
+        self.input_batch_filter_code.clear()
+        self.table_add_bill.setRowCount(0)
 
-            case "page_get_batches":
-                self.input_batch_filter_code.setCurrentIndex(0)
-                self.input_batch_filter_date.setDate(QDate.currentDate())
-                self.batch_reset_button_clicked()
+    def reset_page_get_all_items(self):
+        self.reset_input_code_and_bill_table()
+        self.table_item.setRowCount(0)
+        for row in self.items_list:
+            row_count = self.table_item.rowCount()
+            self.table_item.insertRow(row_count)
+            for i, column in enumerate(row.values()):
+                self.table_item.setItem(row_count, i, QTableWidgetItem(column))
+        self.table_item.resizeColumnsToContents()
 
-            case "page_get_all_bills":
-                self.table_bill.setRowCount(0)
-                for row in get_bills():
-                    row_count = self.table_bill.rowCount()
-                    self.table_bill.insertRow(row_count)
-                    self.table_bill.setItem(row_count, 0, QTableWidgetItem(row.get("id")))
-                    self.table_bill.setItem(row_count, 1, QTableWidgetItem(row.get("customer_name")))
-                    self.table_bill.setItem(row_count, 2, QTableWidgetItem(row.get("bill_date")))
-                    self.table_bill.setItem(row_count, 3, QTableWidgetItem(row.get("total_amount")))
-                    self.table_bill.setItem(row_count, 4, QTableWidgetItem(row.get("discount")))
-                    self.table_bill.setItem(row_count, 5, QTableWidgetItem(row.get("net_amount")))
-                self.table_bill.resizeColumnsToContents()
+    def reset_page_get_batches(self):
+        self.reset_input_code_and_bill_table()
+        self.input_batch_filter_code.addItem(None, None)
+        for item in self.items_list:
+            self.input_batch_filter_code.addItem(item.get("code"), item.get("code"))
+        self.input_batch_filter_date.setDate(QDate.currentDate())
+        self.batch_reset_button_clicked()
 
-            case "page_add_item":
-                self.input_item_name.setText("")
-                self.input_price.setValue(0)
-                self.input_lifecycle.setValue(0)
+    def reset_page_get_all_bills(self):
+        self.reset_input_code_and_bill_table()
+        self.table_bill.setRowCount(0)
 
-            case "page_add_batch":
-                self.input_item_code.setCurrentIndex(0)
-                self.input_batch_no.setText("")
-                self.input_quantity.setValue(0)
-                self.input_batch_price.setValue(0)
-                self.input_mfg_date.setDate(QDate.currentDate())
-                self.input_exp_date.setDate(QDate.currentDate())
+        def fill_table_row(row):
+            row_count = self.table_bill.rowCount()
+            self.table_bill.insertRow(row_count)
+            self.table_bill.setItem(row_count, 0, QTableWidgetItem(row.get("id")))
+            self.table_bill.setItem(row_count, 1, QTableWidgetItem(row.get("customer_name")))
+            self.table_bill.setItem(row_count, 2, QTableWidgetItem(row.get("bill_date")))
+            self.table_bill.setItem(row_count, 3, QTableWidgetItem(row.get("total_amount")))
+            self.table_bill.setItem(row_count, 4, QTableWidgetItem(row.get("discount")))
+            self.table_bill.setItem(row_count, 5, QTableWidgetItem(row.get("net_amount")))
+            bill_detail_button = QPushButton()
+            bill_detail_button.setText("Bill Detail")
+            bill_detail_button.clicked.connect(lambda: self.show_bill_window(row.get("id")))
+            self.table_bill.setCellWidget(row_count, 6, bill_detail_button)
 
-            case "page_add_bill":
-                self.input_customer_name.setText("")
-                self.input_bill_date.setDateTime(QDateTime.currentDateTime())
-                self.table_add_bill.setRowCount(0)
-                self.input_total_amount.setValue(0)
-                self.input_discount.setValue(0)
-                self.input_net_amount.setValue(0)
-                self.input_payment_type.setCurrentIndex(0)
+        for row in get_bills():
+            fill_table_row(row)
+        self.table_bill.resizeColumnsToContents()
 
-            case "page_edit_item":
-                self.input_edit_code.setCurrentIndex(0)
-                self.input_edit_item_name.setText("")
-                self.input_edit_price.setValue(0)
-                self.input_edit_lifecycle.setValue(0)
+    def reset_page_add_item(self):
+        self.reset_input_code_and_bill_table()
+        self.input_item_name.setText("")
+        self.input_price.setValue(0)
+        self.input_lifecycle.setValue(0)
 
-            case "page_edit_batch":
-                self.input_edit_item_code.setCurrentIndex(0)
-                self.input_edit_batch_no.clear()
-                self.input_edit_quantity.setValue(0)
-                self.input_edit_batch_price.setValue(0)
-                self.input_edit_mfg_date.setDate(QDate.currentDate())
-                self.input_edit_exp_date.setDate(QDate.currentDate())
+    def reset_page_add_batch(self):
+        self.reset_input_code_and_bill_table()
+        self.input_item_code.addItem(None, None)
+        for item in self.items_list:
+            self.input_item_code.addItem(item.get("code"), (item.get("life_cycle"), item.get("price")))
+        self.input_batch_no.setText("")
+        self.input_quantity.setValue(0)
+        self.input_batch_price.setValue(0)
+        self.input_mfg_date.setDate(QDate.currentDate())
+        self.input_exp_date.setDate(QDate.currentDate())
 
-            case _:
-                pass
+    def reset_page_add_bill(self):
+        self.reset_input_code_and_bill_table()
+        self.input_customer_name.setText("")
+        self.input_bill_date.setDateTime(QDateTime.currentDateTime())
+        self.table_add_bill.setRowCount(0)
+        self.input_total_amount.setValue(0)
+        self.input_discount.setValue(0)
+        self.input_net_amount.setValue(0)
+        self.input_payment_type.setCurrentIndex(0)
+
+    def reset_page_edit_item(self):
+        self.reset_input_code_and_bill_table()
+        self.input_edit_code.addItem(None, None)
+        for item in self.items_list:
+            self.input_edit_code.addItem(item.get("code"), item.get("code"))
+        self.input_edit_item_name.setText("")
+        self.input_edit_price.setValue(0)
+        self.input_edit_lifecycle.setValue(0)
+
+    def reset_page_edit_batch(self):
+        self.reset_input_code_and_bill_table()
+        self.input_edit_item_code.addItem(None, None)
+        for item in self.items_list:
+            self.input_edit_item_code.addItem(item.get("code"), item.get("code"))
+        self.input_edit_batch_no.clear()
+        self.input_edit_quantity.setValue(0)
+        self.input_edit_batch_price.setValue(0)
+        self.input_edit_mfg_date.setDate(QDate.currentDate())
+        self.input_edit_exp_date.setDate(QDate.currentDate())

@@ -707,6 +707,9 @@ color: rgb(0, 0, 0);</string>
               <height>20</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
@@ -725,6 +728,9 @@ color: rgb(0, 0, 0);</string>
         </item>
         <item row="1" column="0" alignment="Qt::AlignHCenter">
          <widget class="QTableWidget" name="table_add_bill">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="sizeAdjustPolicy">
            <enum>QAbstractScrollArea::AdjustToContents</enum>
           </property>
@@ -871,6 +877,9 @@ color: rgb(0, 0, 0);</string>
               <width>100</width>
               <height>20</height>
              </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1049,6 +1058,9 @@ color: rgb(0, 0, 0);</string>
               <width>100</width>
               <height>20</height>
              </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1387,6 +1399,18 @@ color: rgb(0, 0, 0);</string>
             <column>
              <property name="text">
               <string>Net Amount</string>
+             </property>
+             <property name="font">
+              <font>
+               <family>Segoe UI</family>
+               <pointsize>10</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Bill Detail</string>
              </property>
              <property name="font">
               <font>

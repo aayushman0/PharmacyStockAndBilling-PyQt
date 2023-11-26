@@ -40,7 +40,11 @@ def get_batches(item_code: str | None = None, exp_date: date | None = None, obj:
     return response
 
 
-def get_bills() -> list[dict]:
+def get_bills(id: int | None = None) -> Bill | list[dict]:
+    if id is not None:
+        bill = session.query(Bill).filter(Bill.id == id).scalar()
+        return bill
+
     bills = session.query(Bill).order_by(Bill.bill_date.desc()).all()
     response = [{
         "id": str(bill.id),
@@ -105,18 +109,6 @@ def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, 
             batch.quantity -= quantity
     session.commit()
     return bill
-
-    # response = {
-    #     "id": str(bill.id),
-    #     "customer_name": bill.customer_name,
-    #     "bill_json": json.loads(bill.bill_json),
-    #     "total_amount": str(bill.total_amount),
-    #     "discount": str(bill.discount),
-    #     "net_amount": str(bill.net_amount),
-    #     "payment_type": bill.payment_type,
-    #     "bill_date": bill.bill_date.strftime("%Y-%m-%d %H:%M:%S")
-    # }
-    # return response
 
 
 def edit_item(code: str, name: str, price: float, life_cycle: int) -> Item | str:
