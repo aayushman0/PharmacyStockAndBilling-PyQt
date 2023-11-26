@@ -336,6 +336,17 @@ class MainWindow(QMainWindow):
         net_amount = self.input_net_amount.value()
         payment_type = self.input_payment_type.currentText()
         bill_json = list()
+        for row in range(self.table_add_bill.rowCount()):
+            row_json = {
+                "item_code": self.table_add_bill.cellWidget(row, 0).currentText(),
+                "batch_no": self.table_add_bill.cellWidget(row, 1).currentText(),
+                "mfg_date": self.table_add_bill.cellWidget(row, 2).date().toString(),
+                "exp_date": self.table_add_bill.cellWidget(row, 3).date().toString(),
+                "quantity": self.table_add_bill.cellWidget(row, 4).value(),
+                "price": self.table_add_bill.cellWidget(row, 5).value(),
+                "total": self.table_add_bill.cellWidget(row, 6).value()
+            }
+            bill_json.append(row_json)
         bill = create_bill(customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
         self.reset_page_add_bill()
         self.show_bill_window(bill.id)
