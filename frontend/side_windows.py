@@ -1,9 +1,9 @@
+import os
 import json
 from dotenv import dotenv_values
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem
-from PyQt6.QtGui import QPainter
-from PyQt6.QtPrintSupport import QPrinter
+from docx import Document
 
 from backend import get_bills
 
@@ -75,12 +75,75 @@ class BillWindow(QWidget):
         self.discount.setText(str(bill.discount))
         self.net_total.setText(str(bill.net_amount))
 
-        self.button_print.clicked.connect(self.print_to_printer)
+        self.button_print.clicked.connect(lambda: self.print_to_printer(bill))
 
-    def print_to_printer(self):
-        printer = QPrinter()
-        painter = QPainter()
-        painter.begin(printer)
-        screen = self.grab()
-        painter.drawPixmap(10, 10, screen)
-        painter.end()
+    def print_to_printer(self, bill):
+        document = Document("bill_sample.docx")
+
+        id_string = f"[{bill.id:04d}]"
+        date_string = bill.bill_date.strftime("%d/%m/%Y")
+        customer_name = bill.customer_name
+        items = ""
+        total = f"{bill.total_amount:8.2f}"
+        discount = f"{bill.discount:8.2f}"
+        net_total = f"{bill.net_amount:8.2f}"
+        payment_type = f"[{bill.payment_type}]".rjust(11)
+
+        for i, item in enumerate(json.loads(bill.bill_json)):
+            sn = f"{i:02d}  "
+
+            particular = item.get("item_name", "")
+            particular_length = len(particular)
+            if particular_length < 9:
+                particular = f"{particular}\t\t"
+            elif particular_length < 18:
+                particular = f"{particular}\t"
+            else:
+                particular = particular[:17]
+
+            batch_no = item.get("batch_no", "")
+            batch_no_length = len(batch_no)
+            if batch_no_length < 9:
+                batch_no = f"{batch_no}\t"
+            else:
+                batch_no = batch_no[:9]
+
+            exp = item.get("exp_date", "MM/YYYY")
+            exp = f"{exp[:3]}{exp[5:7]}\t"
+
+            qty = item.get("quantity", 0)
+            qty = f"{qty}".ljust(5)
+
+            price = item.get("price", 0)
+            price = f"{price:.2f}\t"
+
+            amount = item.get("total", 0)
+            amount = f"{amount:.2f}".rjust(9)
+
+            items += f"{sn}{particular}{batch_no}{exp}{qty}{price}{amount}\n"
+
+        replacement_dictionary = {
+            "[----]": id_string,
+            "DD/MM/YYYY": date_string,
+            "[Customer Name]": customer_name,
+            "[Bill]": items,
+            "[TTTTT.00]": total,
+            "[DDDDD.00]": discount,
+            "[NNNNN.00]": net_total,
+            "[PPPPPPPPPPP]": payment_type,
+        }
+
+        def replace_string(paragraph, old_string, new_string):
+            inline = paragraph.runs
+            for i in range(len(inline)):
+                if old_string in inline[i].text:
+                    text = inline[i].text.replace(str(old_string), str(new_string))
+                    inline[i].text = text
+
+        for paragraph in document.paragraphs:
+            for old_string, new_string in replacement_dictionary.items():
+                if old_string in paragraph.text:
+                    replace_string(paragraph, old_string, new_string)
+
+        document.save("bill_output.docx")
+        os.startfile("bill_output.docx", "print")
