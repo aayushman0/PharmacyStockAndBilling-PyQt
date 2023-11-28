@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
             show_message(title="Error", message=response)
             return None
         self.reset_page_add_batch()
-        show_message(title="Success", message=f"{response.get('batch_no')} successfully created.")
+        show_message(title="Success", message=f"{response.batch_no} successfully created.")
 
     def add_next_item_button_clicked(self):
         cell_particular = QComboBox()
@@ -295,6 +295,7 @@ class MainWindow(QMainWindow):
         self.table_add_bill.insertRow(row_count)
         for i, cell in enumerate([cell_particular, cell_batch_no, cell_mfg_date, cell_exp_date, cell_quantity, cell_price, cell_single_total]):
             self.table_add_bill.setCellWidget(row_count, i, cell)
+        self.table_add_bill.resizeColumnsToContents()
         self.table_add_bill.cellWidget(row_count, 0).setFocus()
 
     def cell_particular_activated(self, row_no):
@@ -510,7 +511,6 @@ class MainWindow(QMainWindow):
         self.reset_input_code_and_bill_table()
         self.input_customer_name.setText("")
         self.input_bill_date.setDateTime(QDateTime.currentDateTime())
-        self.table_add_bill.setRowCount(0)
         self.input_total_amount.setValue(0)
         self.input_discount.setValue(0)
         self.input_net_amount.setValue(0)

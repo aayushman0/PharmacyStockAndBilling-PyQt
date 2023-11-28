@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>Bill</class>
+ <widget class="QWidget" name="Bill">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -44,7 +44,6 @@
       <font>
        <family>Segoe UI</family>
        <pointsize>15</pointsize>
-       <weight>75</weight>
        <bold>true</bold>
        <underline>true</underline>
       </font>
@@ -303,73 +302,67 @@
      </property>
      <column>
       <property name="text">
-       <string>Particular</string>
+       <string>          Particular          </string>
       </property>
       <property name="font">
        <font>
         <family>Segoe UI</family>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Batch No.</string>
+       <string>     Batch No.     </string>
       </property>
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Exp Date</string>
+       <string>   Exp Date   </string>
       </property>
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Quantity</string>
+       <string>   Quantity   </string>
       </property>
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Price</string>
+       <string>     Price     </string>
       </property>
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Amount</string>
+       <string>     Amount     </string>
       </property>
       <property name="font">
        <font>
         <pointsize>10</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>

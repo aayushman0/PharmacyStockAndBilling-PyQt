@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Pharma</class>
+ <widget class="QMainWindow" name="Pharma">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -574,7 +574,7 @@ color: rgb(0, 0, 0);</string>
             </property>
             <column>
              <property name="text">
-              <string>Code</string>
+              <string>          Code          </string>
              </property>
              <property name="font">
               <font>
@@ -586,7 +586,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Name</string>
+              <string>          Name          </string>
              </property>
              <property name="font">
               <font>
@@ -598,7 +598,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Price</string>
+              <string>     Price     </string>
              </property>
              <property name="font">
               <font>
@@ -734,9 +734,12 @@ color: rgb(0, 0, 0);</string>
           <property name="sizeAdjustPolicy">
            <enum>QAbstractScrollArea::AdjustToContents</enum>
           </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
           <column>
            <property name="text">
-            <string>Particular</string>
+            <string>          Particular          </string>
            </property>
            <property name="font">
             <font>
@@ -748,7 +751,7 @@ color: rgb(0, 0, 0);</string>
           </column>
           <column>
            <property name="text">
-            <string>Batch No.</string>
+            <string>      Batch No.      </string>
            </property>
            <property name="font">
             <font>
@@ -1205,7 +1208,7 @@ color: rgb(0, 0, 0);</string>
             </property>
             <column>
              <property name="text">
-              <string>Batch No.</string>
+              <string>          Batch No.          </string>
              </property>
              <property name="font">
               <font>
@@ -1217,7 +1220,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Name</string>
+              <string>          Name          </string>
              </property>
              <property name="font">
               <font>
@@ -1229,7 +1232,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Quantity</string>
+              <string>     Quantity     </string>
              </property>
              <property name="font">
               <font>
@@ -1241,7 +1244,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Price</string>
+              <string>     Price     </string>
              </property>
              <property name="font">
               <font>
@@ -1350,7 +1353,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Customer's Name</string>
+              <string>          Customer's Name          </string>
              </property>
              <property name="font">
               <font>
@@ -1362,7 +1365,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Bill Date</string>
+              <string>     Bill Date     </string>
              </property>
              <property name="font">
               <font>
@@ -1386,7 +1389,7 @@ color: rgb(0, 0, 0);</string>
             </column>
             <column>
              <property name="text">
-              <string>Discount</string>
+              <string>   Discount   </string>
              </property>
              <property name="font">
               <font>
@@ -1914,7 +1917,7 @@ color: rgb(0, 0, 0);</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_item">
