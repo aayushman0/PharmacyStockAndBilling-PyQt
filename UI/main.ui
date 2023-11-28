@@ -1982,7 +1982,7 @@ color: rgb(0, 0, 0);</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="label_40">
               <property name="font">
                <font>
@@ -1995,7 +1995,7 @@ color: rgb(0, 0, 0);</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <widget class="QSpinBox" name="input_both_quantity">
               <property name="buttonSymbols">
                <enum>QAbstractSpinBox::NoButtons</enum>
@@ -2057,14 +2057,14 @@ color: rgb(0, 0, 0);</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="label_43">
               <property name="text">
                <string>Price: </string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="2" column="1">
              <widget class="QDoubleSpinBox" name="input_both_price">
               <property name="buttonSymbols">
                <enum>QAbstractSpinBox::NoButtons</enum>
@@ -2254,8 +2254,8 @@ color: rgb(0, 0, 0);</string>
   <tabstop>button_add_bill</tabstop>
   <tabstop>input_both_item_name</tabstop>
   <tabstop>input_both_batch_no</tabstop>
-  <tabstop>input_both_quantity</tabstop>
   <tabstop>input_both_price</tabstop>
+  <tabstop>input_both_quantity</tabstop>
   <tabstop>input_both_mfg_date</tabstop>
   <tabstop>input_both_exp_date</tabstop>
   <tabstop>button_add_both</tabstop>

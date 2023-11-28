@@ -96,10 +96,10 @@ class BillWindow(QWidget):
             particular_length = len(particular)
             if particular_length < 9:
                 particular = f"{particular}\t\t"
-            elif particular_length < 18:
+            elif particular_length < 17:
                 particular = f"{particular}\t"
             else:
-                particular = particular[:17]
+                particular = particular[:16]
 
             batch_no = item.get("batch_no", "")
             batch_no_length = len(batch_no)

@@ -79,7 +79,7 @@ def create_item(name: str, price: float, life_cycle: int | None = None) -> dict 
 def create_batch(item_code: str, batch_no: str, quantity: int, price: float, mfg_date: date, exp_date: date) -> Batch:
     batch = session.query(Batch).filter(Batch.batch_no == batch_no, Batch.item_code == item_code).scalar()
     if batch is None:
-        batch = Batch(item_code, batch_no, quantity, price, mfg_date, exp_date)
+        batch = Batch(item_code, batch_no, quantity, price, mfg_date.replace(day=1), exp_date.replace(day=1))
     else:
         batch.quantity += quantity
         batch.price = price
