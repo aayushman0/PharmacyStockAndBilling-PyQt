@@ -6,8 +6,8 @@ from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QComboBox, QSpinBox, 
 from PyQt6.QtWidgets import QAbstractSpinBox, QPushButton
 from PyQt6.QtGui import QColor
 
-from backend import create_item, create_batch, create_bill, edit_item, edit_batch
-from backend import get_items, get_batches, get_bills, delete_item, delete_batch
+from backend import create_item, create_batch, create_item_and_batch, create_bill
+from backend import get_items, get_batches, get_bills, edit_item, edit_batch, delete_item, delete_batch
 from .side_windows import show_message, BillWindow
 
 # For Type Hinting
@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         # Menu Bar
         self.action_add_item: QtGui.QAction
         self.action_add_batch: QtGui.QAction
+        self.action_add_item_and_batch: QtGui.QAction
         self.action_add_bill: QtGui.QAction
         self.action_get_all_items: QtGui.QAction
         self.action_get_batches: QtGui.QAction
@@ -47,6 +48,7 @@ class MainWindow(QMainWindow):
         self.stacked_widget: QtWidgets.QStackedWidget
         self.page_add_item: QtWidgets.QWidget
         self.page_add_batch: QtWidgets.QWidget
+        self.page_add_item_and_batch: QtWidgets.QWidget
         self.page_add_bill: QtWidgets.QWidget
         self.page_get_all_items: QtWidgets.QWidget
         self.page_get_batches: QtWidgets.QWidget
@@ -80,6 +82,15 @@ class MainWindow(QMainWindow):
         self.input_mfg_date: QtWidgets.QDateEdit
         self.input_exp_date: QtWidgets.QDateEdit
         self.button_add_batch: QtWidgets.QPushButton
+
+        # Add Item and Batch
+        self.input_both_item_name: QtWidgets.QLineEdit
+        self.input_both_batch_no: QtWidgets.QLineEdit
+        self.input_both_quantity: QtWidgets.QSpinBox
+        self.input_both_price: QtWidgets.QDoubleSpinBox
+        self.input_both_mfg_date: QtWidgets.QDateEdit
+        self.input_both_exp_date: QtWidgets.QDateEdit
+        self.button_add_both: QtWidgets.QPushButton
 
         # Add Bill Page
         self.input_customer_name: QtWidgets.QLineEdit
@@ -125,6 +136,7 @@ class MainWindow(QMainWindow):
         change_screen("page_add_bill")
         self.action_add_item.triggered.connect(lambda: change_screen("page_add_item"))
         self.action_add_batch.triggered.connect(lambda: change_screen("page_add_batch"))
+        self.action_add_item_and_batch.triggered.connect(lambda: change_screen("page_add_item_and_batch"))
         self.action_add_bill.triggered.connect(lambda: change_screen("page_add_bill"))
         self.action_get_all_items.triggered.connect(lambda: change_screen("page_get_all_items"))
         self.action_get_batches.triggered.connect(lambda: change_screen("page_get_batches"))
@@ -149,6 +161,9 @@ class MainWindow(QMainWindow):
         self.input_item_code.activated.connect(self.add_batch_code_entered)
         self.input_mfg_date.dateChanged.connect(self.add_batch_mfg_changed)
         self.button_add_batch.clicked.connect(self.add_batch_button_clicked)
+
+        # Add Item and Batch
+        self.button_add_both.clicked.connect(self.add_both_button_clicked)
 
         # Add Bill Page
         self.button_add_next_item.clicked.connect(self.add_next_item_button_clicked)
@@ -219,7 +234,7 @@ class MainWindow(QMainWindow):
         if type(response) is str:
             show_message(title="Error", message=response)
             return None
-        self.items_list.append(response)
+        self.items_list = get_items()
         self.reset_page_add_item()
         show_message(title="Success", message=f"{response.get('code')} successfully created.")
 
@@ -249,6 +264,21 @@ class MainWindow(QMainWindow):
             return None
         self.reset_page_add_batch()
         show_message(title="Success", message=f"{response.batch_no} successfully created.")
+
+    def add_both_button_clicked(self):
+        name = self.input_both_item_name.text()
+        batch_no = self.input_both_batch_no.text()
+        quantity = self.input_both_quantity.value()
+        price = self.input_both_price.value()
+        if not (name and batch_no and quantity and price):
+            show_message(title="Missing Value", message="One or more field is missing a value.")
+            return None
+        mfg_date = self.input_both_mfg_date.date().toPyDate()
+        exp_date = self.input_both_exp_date.date().toPyDate()
+        item, batch = create_item_and_batch(name, batch_no, quantity, price, mfg_date, exp_date)
+        self.items_list = get_items()
+        self.reset_page_add_item_and_batch()
+        show_message(title="Success", message=f"{item.name} Batch No.: {batch.batch_no} successfully created.")
 
     def add_next_item_button_clicked(self):
         cell_particular = QComboBox()
@@ -339,6 +369,7 @@ class MainWindow(QMainWindow):
         bill_json = list()
         for row in range(self.table_add_bill.rowCount()):
             row_json = {
+                "item_code": self.table_add_bill.cellWidget(row, 0).currentData(),
                 "item_name": self.table_add_bill.cellWidget(row, 0).currentText(),
                 "batch_no": self.table_add_bill.cellWidget(row, 1).currentText(),
                 "mfg_date": self.table_add_bill.cellWidget(row, 2).date().toString("MM/yyyy"),
@@ -506,6 +537,15 @@ class MainWindow(QMainWindow):
         self.input_batch_price.setValue(0)
         self.input_mfg_date.setDate(QDate.currentDate())
         self.input_exp_date.setDate(QDate.currentDate())
+
+    def reset_page_add_item_and_batch(self):
+        self.reset_input_code_and_bill_table()
+        self.input_both_item_name.setText("")
+        self.input_both_batch_no.setText("")
+        self.input_both_price.setValue(0)
+        self.input_both_quantity.setValue(0)
+        self.input_both_mfg_date.setDate(QDate.currentDate())
+        self.input_both_exp_date.setDate(QDate.currentDate())
 
     def reset_page_add_bill(self):
         self.reset_input_code_and_bill_table()

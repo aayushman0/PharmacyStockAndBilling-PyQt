@@ -140,7 +140,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>8</number>
       </property>
       <widget class="QWidget" name="page_add_item">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -284,7 +284,7 @@
 color: rgb(0, 0, 0);</string>
             </property>
             <property name="text">
-             <string>Submit</string>
+             <string>Save</string>
             </property>
             <property name="flat">
              <bool>false</bool>
@@ -509,7 +509,7 @@ color: rgb(0, 0, 0);</string>
 color: rgb(0, 0, 0);</string>
             </property>
             <property name="text">
-             <string>Submit</string>
+             <string>Save</string>
             </property>
             <property name="flat">
              <bool>false</bool>
@@ -1462,7 +1462,7 @@ color: rgb(0, 0, 0);</string>
              </font>
             </property>
             <property name="text">
-             <string>Edit Item (WIP)</string>
+             <string>Edit Item</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -1907,6 +1907,218 @@ color: rgb(0, 0, 0);</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="page_add_item_and_batch">
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_37">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>15</pointsize>
+              <bold>true</bold>
+              <underline>true</underline>
+             </font>
+            </property>
+            <property name="text">
+             <string>Add New Item to Stock</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QFormLayout" name="form_edit_batch_2">
+            <property name="horizontalSpacing">
+             <number>10</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>11</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_38">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Name: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_39">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>10</pointsize>
+                <underline>false</underline>
+               </font>
+              </property>
+              <property name="text">
+               <string>Batch No.: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Quantity: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="input_both_quantity">
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="suffix">
+               <string/>
+              </property>
+              <property name="maximum">
+               <number>99999</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>Mfg. Date: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QDateEdit" name="input_both_mfg_date">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="displayFormat">
+               <string>M/yyyy</string>
+              </property>
+              <property name="calendarPopup">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Exp. Date: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDateEdit" name="input_both_exp_date">
+              <property name="font">
+               <font>
+                <family>Segoe UI</family>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="displayFormat">
+               <string>M/yyyy</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_43">
+              <property name="text">
+               <string>Price: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QDoubleSpinBox" name="input_both_price">
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
+              <property name="maximum">
+               <double>99999999.989999994635582</double>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="input_both_item_name"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="input_both_batch_no"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_add_both">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Segoe UI</family>
+              <pointsize>10</pointsize>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(52, 255, 82);
+color: rgb(0, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>Save</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -1922,7 +2134,7 @@ color: rgb(0, 0, 0);</string>
    </property>
    <widget class="QMenu" name="menu_item">
     <property name="title">
-     <string>Items</string>
+     <string>   Items   </string>
     </property>
     <addaction name="action_get_all_items"/>
     <addaction name="action_add_item"/>
@@ -1930,15 +2142,16 @@ color: rgb(0, 0, 0);</string>
    </widget>
    <widget class="QMenu" name="menu_batch">
     <property name="title">
-     <string>Batches</string>
+     <string>   Stock   </string>
     </property>
     <addaction name="action_get_batches"/>
     <addaction name="action_add_batch"/>
     <addaction name="action_edit_batch"/>
+    <addaction name="action_add_item_and_batch"/>
    </widget>
    <widget class="QMenu" name="menu_bill">
     <property name="title">
-     <string>Bills</string>
+     <string>   Bills   </string>
     </property>
     <addaction name="action_get_all_bills"/>
     <addaction name="action_add_bill"/>
@@ -1960,7 +2173,7 @@ color: rgb(0, 0, 0);</string>
   </action>
   <action name="action_edit_item">
    <property name="text">
-    <string>Edit Item (WIP)</string>
+    <string>Edit Item</string>
    </property>
   </action>
   <action name="action_remove_item">
@@ -1970,7 +2183,7 @@ color: rgb(0, 0, 0);</string>
   </action>
   <action name="action_get_batches">
    <property name="text">
-    <string>List Batches</string>
+    <string>List Stock</string>
    </property>
   </action>
   <action name="action_add_batch">
@@ -1996,6 +2209,11 @@ color: rgb(0, 0, 0);</string>
   <action name="action_add_bill">
    <property name="text">
     <string>Add Bill</string>
+   </property>
+  </action>
+  <action name="action_add_item_and_batch">
+   <property name="text">
+    <string>Add Item and Batch</string>
    </property>
   </action>
  </widget>
@@ -2029,6 +2247,18 @@ color: rgb(0, 0, 0);</string>
   <tabstop>input_batch_filter_date</tabstop>
   <tabstop>table_batch</tabstop>
   <tabstop>table_bill</tabstop>
+  <tabstop>input_customer_name</tabstop>
+  <tabstop>button_add_next_item</tabstop>
+  <tabstop>input_discount</tabstop>
+  <tabstop>input_payment_type</tabstop>
+  <tabstop>button_add_bill</tabstop>
+  <tabstop>input_both_item_name</tabstop>
+  <tabstop>input_both_batch_no</tabstop>
+  <tabstop>input_both_quantity</tabstop>
+  <tabstop>input_both_price</tabstop>
+  <tabstop>input_both_mfg_date</tabstop>
+  <tabstop>input_both_exp_date</tabstop>
+  <tabstop>button_add_both</tabstop>
  </tabstops>
  <resources/>
  <connections/>
