@@ -5,11 +5,16 @@ from dateutil import relativedelta
 from models import session
 from models import Item, Batch, Bill
 
+from sqlalchemy import func
 
-def get_items(code: str | None = None) -> list[dict]:
+
+def get_items(code: str | None = None, code_list: list | None = None) -> list[dict]:
     items = session.query(Item)
     if code is not None:
-        items = items.filter(Item.code == code)
+        items = items.filter(Item.code.contains(code))
+    if code_list is not None:
+        for filter_code in code_list:
+            items = items.filter(Item.code.contains(filter_code))
     response = [{
         "code": item.code,
         "name": item.name,
@@ -22,7 +27,7 @@ def get_items(code: str | None = None) -> list[dict]:
 def get_batches(item_code: str | None = None, exp_date: date | None = None, obj: bool = False) -> list[dict] | list[Batch]:
     batches = session.query(Batch)
     if item_code is not None:
-        batches = batches.filter(Batch.item_code == item_code)
+        batches = batches.filter(Batch.item_code.contains(item_code))
     if exp_date is not None:
         batches = batches.filter(Batch.exp_date <= exp_date.replace(day=1))
     batches = batches.order_by(Batch.exp_date)
@@ -35,17 +40,21 @@ def get_batches(item_code: str | None = None, exp_date: date | None = None, obj:
         "price": str(batch.price),
         "mfg_date": batch.mfg_date.strftime("%m/%Y"),
         "exp_date": batch.exp_date.strftime("%m/%Y"),
-        "color": (255, 225, 100) if batch.exp_date <= date.today().replace(day=1) else None
+        "color": (255, 225, 100) if batch.exp_date <= date.today().replace(day=1) else None,
+        "total": "{:.2f}".format(batch.quantity * batch.price),
     } for batch in batches]
     return response
 
 
-def get_bills(id: int | None = None) -> Bill | list[dict]:
+def get_bills(id: int | None = None, date: date | None = None) -> Bill | list[dict]:
     if id is not None:
         bill = session.query(Bill).filter(Bill.id == id).scalar()
         return bill
 
-    bills = session.query(Bill).order_by(Bill.bill_date.desc()).all()
+    if date is not None:
+        bills = session.query(Bill).filter(func.DATE(Bill.bill_date) == date).order_by(Bill.bill_date.desc())
+    else:
+        bills = session.query(Bill).order_by(Bill.bill_date.desc()).all()
     response = [{
         "id": str(bill.id),
         "customer_name": bill.customer_name,
