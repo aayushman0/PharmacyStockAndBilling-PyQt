@@ -94,19 +94,21 @@ class BillWindow(QWidget):
 
             particular = item.get("item_name", "")
             particular_length = len(particular)
-            if particular_length < 9:
+            if particular_length < 10:
                 particular = f"{particular}\t\t"
-            elif particular_length < 17:
+            elif particular_length < 16:
                 particular = f"{particular}\t"
             else:
-                particular = particular[:16]
+                particular = particular[:15] + "\t"
 
             batch_no = item.get("batch_no", "")
             batch_no_length = len(batch_no)
-            if batch_no_length < 9:
+            if batch_no_length < 7:
+                batch_no = f"{batch_no}\t\t"
+            elif batch_no_length < 12:
                 batch_no = f"{batch_no}\t"
             else:
-                batch_no = batch_no[:9]
+                batch_no = batch_no[:11] + "\t"
 
             exp = item.get("exp_date", "MM/YYYY")
             exp = f"{exp[:3]}{exp[5:7]}\t"
@@ -126,7 +128,7 @@ class BillWindow(QWidget):
             "[----]": id_string,
             "DD/MM/YYYY": date_string,
             "[Customer Name]": customer_name,
-            "[Bill]": items,
+            "[Bill]": "\n" + items,
             "[TTTTT.00]": total,
             "[DDDDD.00]": discount,
             "[NNNNN.00]": net_total,
