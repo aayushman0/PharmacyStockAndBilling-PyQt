@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from dateutil import relativedelta
 from models import session
-from models import Item, Batch, Bill
+from models import Item, Batch, Bill, ServiceBill
 
 from sqlalchemy import func
 
@@ -68,6 +68,28 @@ def get_bills(id: int | None = None, date: date | None = None) -> Bill | list[di
     return response
 
 
+def get_service_bills(id: int | None = None, date: date | None = None) -> ServiceBill | list[dict]:
+    if id is not None:
+        service_bill = session.query(ServiceBill).filter(ServiceBill.id == id).scalar()
+        return service_bill
+
+    if date is not None:
+        service_bills = session.query(ServiceBill).filter(func.DATE(ServiceBill.bill_date) == date).order_by(ServiceBill.bill_date.desc())
+    else:
+        service_bills = session.query(ServiceBill).order_by(ServiceBill.bill_date.desc()).all()
+    response = [{
+        "id": str(bill.id),
+        "patient_name": bill.patient_name,
+        "bill_json": json.loads(bill.bill_json),
+        "total_amount": str(bill.total_amount),
+        "discount": str(bill.discount),
+        "net_amount": str(bill.net_amount),
+        "payment_type": bill.payment_type,
+        "bill_date": bill.bill_date.strftime("%Y-%m-%d %H:%M:%S")
+    } for bill in service_bills]
+    return response
+
+
 def create_item(name: str, price: float, life_cycle: int | None = None) -> dict | str:
     code = re.sub('[^A-Za-z0-9]+', '', name).lower()
     check_code = session.query(Item).filter(Item.code == code).count()
@@ -118,6 +140,13 @@ def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, 
             batch.quantity -= quantity
     session.commit()
     return bill
+
+
+def create_service_bill(patient_name: str, bill_json: list[dict], total_amount: float, discount: float, net_amount: float, payment_type: str, bill_date: datetime) -> ServiceBill:
+    service_bill = ServiceBill(patient_name, json.dumps(bill_json), total_amount, discount, net_amount, payment_type, bill_date)
+    session.add(service_bill)
+    session.commit()
+    return service_bill
 
 
 def edit_item(code: str, name: str, price: float, life_cycle: int) -> Item | str:

@@ -71,6 +71,31 @@ class Bill(BaseModel):
         return f"{self.id}. {self.customer_name}"
 
 
+class ServiceBill(BaseModel):
+    __tablename__ = "service_bill"
+
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    patient_name = Column("name", String(64))
+    bill_json = Column("bill_json", String)
+    total_amount = Column("total_amount", Float)
+    discount = Column("discount", Float)
+    net_amount = Column("net_amount", Float)
+    payment_type = Column("payment_type", String(64))
+    bill_date = Column("bill_date", DateTime)
+
+    def __init__(self, patient_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date):
+        self.patient_name = patient_name
+        self.bill_json = bill_json
+        self.total_amount = total_amount
+        self.discount = discount
+        self.net_amount = net_amount
+        self.payment_type = payment_type
+        self.bill_date = bill_date
+
+    def __repr__(self):
+        return f"{self.id}. {self.patient_name}"
+
+
 engine = create_engine("sqlite:///mydb.db", echo=False)
 BaseModel.metadata.create_all(bind=engine)
 

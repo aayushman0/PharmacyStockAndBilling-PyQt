@@ -4,12 +4,12 @@ from datetime import date
 from PyQt6.uic import loadUi
 from PyQt6.QtCore import QDate, QDateTime, Qt
 from PyQt6.QtWidgets import QMainWindow, QTableWidgetItem, QComboBox, QSpinBox, QDoubleSpinBox, QDateEdit
-from PyQt6.QtWidgets import QAbstractSpinBox, QPushButton
+from PyQt6.QtWidgets import QAbstractSpinBox, QPushButton, QLineEdit
 from PyQt6.QtGui import QColor
 
-from backend import create_item, create_batch, create_item_and_batch, create_bill
-from backend import get_items, get_batches, get_bills, edit_item, edit_batch, delete_item, delete_batch
-from .side_windows import show_message, BillWindow
+from backend import create_item, create_batch, create_item_and_batch, create_bill, create_service_bill
+from backend import get_items, get_batches, get_bills, get_service_bills, edit_item, edit_batch, delete_item, delete_batch
+from .side_windows import show_message, BillWindow, ServiceBillWindow
 
 # For Type Hinting
 from PyQt6 import QtWidgets, QtGui
@@ -39,9 +39,11 @@ class MainWindow(QMainWindow):
         self.action_add_batch: QtGui.QAction
         self.action_add_item_and_batch: QtGui.QAction
         self.action_add_bill: QtGui.QAction
+        self.action_add_service_bill: QtGui.QAction
         self.action_get_all_items: QtGui.QAction
         self.action_get_batches: QtGui.QAction
         self.action_get_all_bills: QtGui.QAction
+        self.action_get_all_service_bills: QtGui.QAction
         self.action_edit_item: QtGui.QAction
         self.action_edit_batch: QtGui.QAction
 
@@ -69,6 +71,12 @@ class MainWindow(QMainWindow):
         # Get All Bills Page
         self.table_bill: QtWidgets.QTableWidget
         self.input_list_bills_date: QtWidgets.QDateEdit
+        self.input_bill_day_total: QtWidgets.QDoubleSpinBox
+
+        # Get All Service Bills Page
+        self.table_service_bill: QtWidgets.QTableWidget
+        self.input_list_service_bills_date: QtWidgets.QDateEdit
+        self.input_service_bill_day_total: QtWidgets.QDoubleSpinBox
 
         # Add Item Page
         self.input_item_name: QtWidgets.QLineEdit
@@ -105,6 +113,17 @@ class MainWindow(QMainWindow):
         self.input_payment_type: QtWidgets.QComboBox
         self.button_add_bill: QtWidgets.QPushButton
 
+        # Add Service Bill Page
+        self.input_patient_name: QtWidgets.QLineEdit
+        self.input_service_bill_date: QtWidgets.QDateTimeEdit
+        self.table_add_service_bill: QtWidgets.QTableWidget
+        self.button_add_next_service_item: QtWidgets.QPushButton
+        self.input_total_service_amount: QtWidgets.QDoubleSpinBox
+        self.input_service_discount: QtWidgets.QDoubleSpinBox
+        self.input_service_net_amount: QtWidgets.QDoubleSpinBox
+        self.input_service_payment_type: QtWidgets.QComboBox
+        self.button_add_service_bill: QtWidgets.QPushButton
+
         # Edit Item Page
         self.input_edit_code: QtWidgets.QComboBox
         self.input_edit_item_name: QtWidgets.QLineEdit
@@ -140,9 +159,11 @@ class MainWindow(QMainWindow):
         self.action_add_batch.triggered.connect(lambda: change_screen("page_add_batch"))
         self.action_add_item_and_batch.triggered.connect(lambda: change_screen("page_add_item_and_batch"))
         self.action_add_bill.triggered.connect(lambda: change_screen("page_add_bill"))
+        self.action_add_service_bill.triggered.connect(lambda: change_screen("page_add_service_bill"))
         self.action_get_all_items.triggered.connect(lambda: change_screen("page_get_all_items"))
         self.action_get_batches.triggered.connect(lambda: change_screen("page_get_batches"))
         self.action_get_all_bills.triggered.connect(lambda: change_screen("page_get_all_bills"))
+        self.action_get_all_service_bills.triggered.connect(lambda: change_screen("page_get_all_service_bills"))
         self.action_edit_item.triggered.connect(lambda: change_screen("page_edit_item"))
         self.action_edit_batch.triggered.connect(lambda: change_screen("page_edit_batch"))
 
@@ -157,6 +178,9 @@ class MainWindow(QMainWindow):
 
         # Get All Bills Page
         self.input_list_bills_date.dateChanged.connect(self.list_bill_date_changed)
+
+        # Get All Service Bills Page
+        self.input_list_service_bills_date.dateChanged.connect(self.list_service_bill_date_changed)
 
         # Add Item Page
         self.button_add_item.clicked.connect(self.add_item_button_clicked)
@@ -173,6 +197,11 @@ class MainWindow(QMainWindow):
         self.button_add_next_item.clicked.connect(self.add_next_item_button_clicked)
         self.input_discount.valueChanged.connect(self.net_amount_updated)
         self.button_add_bill.clicked.connect(self.add_bill_button_clicked)
+
+        # Add Service Bill Page
+        self.button_add_next_service_item.clicked.connect(self.add_next_service_item_button_clicked)
+        self.input_service_discount.valueChanged.connect(self.service_net_amount_updated)
+        self.button_add_service_bill.clicked.connect(self.add_service_bill_button_clicked)
 
         # Edit Item Page
         self.input_edit_code.activated.connect(self.edit_item_code_entered)
@@ -245,6 +274,7 @@ class MainWindow(QMainWindow):
 
     def list_bill_date_changed(self):
         self.table_bill.setRowCount(0)
+        day_total: float = 0
 
         def fill_table_row(row):
             row_count = self.table_bill.rowCount()
@@ -259,10 +289,36 @@ class MainWindow(QMainWindow):
             bill_detail_button.setText("Bill Detail")
             bill_detail_button.clicked.connect(lambda: self.show_bill_window(row.get("id")))
             self.table_bill.setCellWidget(row_count, 6, bill_detail_button)
+            return float(row.get("net_amount"))
 
         for row in get_bills(date=self.input_list_bills_date.date().toPyDate()):
-            fill_table_row(row)
+            day_total += fill_table_row(row)
         self.table_bill.resizeColumnsToContents()
+        self.input_bill_day_total.setValue(day_total)
+
+    def list_service_bill_date_changed(self):
+        self.table_service_bill.setRowCount(0)
+        day_total: float = 0
+
+        def fill_table_row(row):
+            row_count = self.table_service_bill.rowCount()
+            self.table_service_bill.insertRow(row_count)
+            self.table_service_bill.setItem(row_count, 0, QTableWidgetItem(row.get("id")))
+            self.table_service_bill.setItem(row_count, 1, QTableWidgetItem(row.get("patient_name")))
+            self.table_service_bill.setItem(row_count, 2, QTableWidgetItem(row.get("bill_date")))
+            self.table_service_bill.setItem(row_count, 3, QTableWidgetItem(row.get("total_amount")))
+            self.table_service_bill.setItem(row_count, 4, QTableWidgetItem(row.get("discount")))
+            self.table_service_bill.setItem(row_count, 5, QTableWidgetItem(row.get("net_amount")))
+            bill_detail_button = QPushButton()
+            bill_detail_button.setText("Bill Detail")
+            bill_detail_button.clicked.connect(lambda: self.show_service_bill_window(row.get("id")))
+            self.table_service_bill.setCellWidget(row_count, 6, bill_detail_button)
+            return float(row.get("total_amount"))
+
+        for row in get_service_bills(date=self.input_list_service_bills_date.date().toPyDate()):
+            day_total += fill_table_row(row)
+        self.table_service_bill.resizeColumnsToContents()
+        self.input_service_bill_day_total.setValue(day_total)
 
     def add_item_button_clicked(self):
         name = self.input_item_name.text()
@@ -358,12 +414,13 @@ class MainWindow(QMainWindow):
         cell_single_total.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         # -------------------------------------------------------------------------------- #
 
+        row_count = self.table_add_bill.rowCount()
+        self.table_add_bill.insertRow(row_count)
+
         cell_particular.activated.connect(lambda: self.cell_particular_activated(row_count))
         cell_batch_no.activated.connect(lambda: self.cell_batch_no_activated(row_count))
         cell_quantity.valueChanged.connect(lambda: self.cell_quantity_updated(row_count))
 
-        row_count = self.table_add_bill.rowCount()
-        self.table_add_bill.insertRow(row_count)
         for i, cell in enumerate([cell_particular, cell_batch_no, cell_mfg_date, cell_exp_date, cell_quantity, cell_price, cell_single_total]):
             self.table_add_bill.setCellWidget(row_count, i, cell)
         self.table_add_bill.resizeColumnsToContents()
@@ -433,6 +490,64 @@ class MainWindow(QMainWindow):
         bill = create_bill(customer_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
         self.reset_page_add_bill()
         self.show_bill_window(bill.id)
+
+    def add_next_service_item_button_clicked(self):
+        cell_particular = QLineEdit()
+        cell_quantity = QSpinBox()
+        cell_price = QDoubleSpinBox()
+        cell_single_total = QDoubleSpinBox()
+
+        cell_quantity.setMaximum(9999999)
+        cell_quantity.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_price.setMaximum(9999999)
+        cell_price.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+        cell_single_total.setMaximum(999999999)
+        cell_single_total.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+
+        row_count = self.table_add_service_bill.rowCount()
+        self.table_add_service_bill.insertRow(row_count)
+
+        cell_quantity.valueChanged.connect(lambda: self.cell_service_qty_or_price_updated(row_count))
+        cell_price.valueChanged.connect(lambda: self.cell_service_qty_or_price_updated(row_count))
+
+        for i, cell in enumerate([cell_particular, cell_quantity, cell_price, cell_single_total]):
+            self.table_add_service_bill.setCellWidget(row_count, i, cell)
+        self.table_add_service_bill.resizeColumnsToContents()
+        self.table_add_service_bill.cellWidget(row_count, 0).setFocus()
+
+    def cell_service_qty_or_price_updated(self, row_no):
+        quantity = self.table_add_service_bill.cellWidget(row_no, 1).value()
+        price = self.table_add_service_bill.cellWidget(row_no, 2).value()
+        self.table_add_service_bill.cellWidget(row_no, 3).setValue(quantity * price)
+
+        total = 0
+        for row_no in range(self.table_add_service_bill.rowCount()):
+            total += self.table_add_service_bill.cellWidget(row_no, 3).value()
+        self.input_total_service_amount.setValue(total)
+        self.service_net_amount_updated()
+
+    def service_net_amount_updated(self):
+        self.input_service_net_amount.setValue(self.input_total_service_amount.value() - self.input_service_discount.value())
+
+    def add_service_bill_button_clicked(self):
+        patient_name = self.input_patient_name.text()
+        bill_date = self.input_service_bill_date.dateTime().toPyDateTime()
+        total_amount = self.input_total_service_amount.value()
+        discount = self.input_service_discount.value()
+        net_amount = self.input_service_net_amount.value()
+        payment_type = self.input_service_payment_type.currentText()
+        bill_json = list()
+        for row in range(self.table_add_service_bill.rowCount()):
+            row_json = {
+                "particular": self.table_add_service_bill.cellWidget(row, 0).text(),
+                "quantity": self.table_add_service_bill.cellWidget(row, 1).value(),
+                "price": self.table_add_service_bill.cellWidget(row, 2).value(),
+                "total": self.table_add_service_bill.cellWidget(row, 3).value(),
+            }
+            bill_json.append(row_json)
+        service_bill = create_service_bill(patient_name, bill_json, total_amount, discount, net_amount, payment_type, bill_date)
+        self.reset_page_add_service_bill()
+        self.show_service_bill_window(service_bill.id)
 
     def edit_item_code_entered(self):
         if not self.input_edit_code.currentText():
@@ -522,6 +637,10 @@ class MainWindow(QMainWindow):
         self.bill_window = BillWindow(bill_id)
         self.bill_window.show()
 
+    def show_service_bill_window(self, service_bill_id: int):
+        self.service_bill_window = ServiceBillWindow(service_bill_id)
+        self.service_bill_window.show()
+
     # ------------------------------------------Reset Page Logic------------------------------------------
     # ----------------------------------------------------------------------------------------------------
     def reset_input_code_and_bill_table(self):
@@ -531,6 +650,7 @@ class MainWindow(QMainWindow):
         self.input_edit_item_code.clear()
         self.input_batch_filter_code.clear()
         self.table_add_bill.setRowCount(0)
+        self.table_add_service_bill.setRowCount(0)
 
     def reset_page_get_all_items(self):
         self.reset_input_code_and_bill_table()
@@ -553,6 +673,7 @@ class MainWindow(QMainWindow):
     def reset_page_get_all_bills(self):
         self.reset_input_code_and_bill_table()
         self.input_list_bills_date.setDate(QDate.currentDate())
+        self.input_bill_day_total.setValue(0)
         self.table_bill.setRowCount(0)
 
         def fill_table_row(row):
@@ -572,6 +693,30 @@ class MainWindow(QMainWindow):
         for row in get_bills():
             fill_table_row(row)
         self.table_bill.resizeColumnsToContents()
+
+    def reset_page_get_all_service_bills(self):
+        self.reset_input_code_and_bill_table()
+        self.input_list_service_bills_date.setDate(QDate.currentDate())
+        self.input_service_bill_day_total.setValue(0)
+        self.table_service_bill.setRowCount(0)
+
+        def fill_table_row(row):
+            row_count = self.table_service_bill.rowCount()
+            self.table_service_bill.insertRow(row_count)
+            self.table_service_bill.setItem(row_count, 0, QTableWidgetItem(row.get("id")))
+            self.table_service_bill.setItem(row_count, 1, QTableWidgetItem(row.get("patient_name")))
+            self.table_service_bill.setItem(row_count, 2, QTableWidgetItem(row.get("bill_date")))
+            self.table_service_bill.setItem(row_count, 3, QTableWidgetItem(row.get("total_amount")))
+            self.table_service_bill.setItem(row_count, 4, QTableWidgetItem(row.get("discount")))
+            self.table_service_bill.setItem(row_count, 5, QTableWidgetItem(row.get("net_amount")))
+            bill_detail_button = QPushButton()
+            bill_detail_button.setText("Bill Detail")
+            bill_detail_button.clicked.connect(lambda: self.show_service_bill_window(row.get("id")))
+            self.table_service_bill.setCellWidget(row_count, 6, bill_detail_button)
+
+        for row in get_service_bills():
+            fill_table_row(row)
+        self.table_service_bill.resizeColumnsToContents()
 
     def reset_page_add_item(self):
         self.reset_input_code_and_bill_table()
@@ -607,6 +752,15 @@ class MainWindow(QMainWindow):
         self.input_discount.setValue(0)
         self.input_net_amount.setValue(0)
         self.input_payment_type.setCurrentIndex(0)
+
+    def reset_page_add_service_bill(self):
+        self.reset_input_code_and_bill_table()
+        self.input_patient_name.setText("")
+        self.input_service_bill_date.setDateTime(QDateTime.currentDateTime())
+        self.input_total_service_amount.setValue(0)
+        self.input_service_discount.setValue(0)
+        self.input_service_net_amount.setValue(0)
+        self.input_service_payment_type.setCurrentIndex(0)
 
     def reset_page_edit_item(self):
         self.reset_input_code_and_bill_table()
