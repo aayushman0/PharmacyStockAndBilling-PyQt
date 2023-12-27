@@ -140,7 +140,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>7</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="page_add_item">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -1214,7 +1214,7 @@ color: rgb(0, 0, 0);</string>
           </property>
           <column>
            <property name="text">
-            <string>          Particular          </string>
+            <string>                         Particular                         </string>
            </property>
            <property name="font">
             <font>
@@ -1226,7 +1226,7 @@ color: rgb(0, 0, 0);</string>
           </column>
           <column>
            <property name="text">
-            <string>Quantity</string>
+            <string>    Quantity     </string>
            </property>
            <property name="font">
             <font>
@@ -1238,7 +1238,7 @@ color: rgb(0, 0, 0);</string>
           </column>
           <column>
            <property name="text">
-            <string>Price</string>
+            <string>       Price       </string>
            </property>
            <property name="font">
             <font>
@@ -1250,7 +1250,7 @@ color: rgb(0, 0, 0);</string>
           </column>
           <column>
            <property name="text">
-            <string>Total</string>
+            <string>       Total       </string>
            </property>
            <property name="font">
             <font>

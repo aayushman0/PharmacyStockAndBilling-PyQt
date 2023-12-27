@@ -213,7 +213,7 @@ class ServiceBillWindow(QWidget):
 
         id_string = f"[{bill.id:04d}]"
         date_string = bill.bill_date.strftime("%d/%m/%Y")
-        customer_name = bill.customer_name
+        customer_name = bill.patient_name
         items = ""
         total = f"{bill.total_amount:8.2f}"
         discount = f"{bill.discount:8.2f}"

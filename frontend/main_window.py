@@ -761,6 +761,7 @@ class MainWindow(QMainWindow):
         self.input_service_discount.setValue(0)
         self.input_service_net_amount.setValue(0)
         self.input_service_payment_type.setCurrentIndex(0)
+        self.table_add_service_bill.resizeColumnsToContents()
 
     def reset_page_edit_item(self):
         self.reset_input_code_and_bill_table()

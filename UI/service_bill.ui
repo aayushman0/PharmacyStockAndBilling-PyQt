@@ -302,7 +302,7 @@
      </property>
      <column>
       <property name="text">
-       <string>          Particular          </string>
+       <string>                         Particular                         </string>
       </property>
       <property name="font">
        <font>
