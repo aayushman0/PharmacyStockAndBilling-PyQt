@@ -440,7 +440,7 @@ class MainWindow(QMainWindow):
         if not code:
             return None
         self.table_add_bill.cellWidget(row_no, 1).clear()
-        for batch in get_batches(item_code=code, obj=True):
+        for batch in get_batches(item_code=code, obj=True, exact=True):
             if batch.exp_date > date.today().replace(day=1):
                 self.table_add_bill.cellWidget(row_no, 1).addItem(batch.batch_no, (batch.mfg_date, batch.exp_date, batch.price))
         self.cell_batch_no_activated(row_no)

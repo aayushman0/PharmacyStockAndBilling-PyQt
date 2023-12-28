@@ -9,7 +9,7 @@ from sqlalchemy import func
 
 
 def get_items(code: str | None = None, code_list: list | None = None) -> list[dict]:
-    items = session.query(Item)
+    items = session.query(Item).order_by(Item.code)
     if code is not None:
         items = items.filter(Item.code.contains(code))
     if code_list is not None:
@@ -24,10 +24,13 @@ def get_items(code: str | None = None, code_list: list | None = None) -> list[di
     return response
 
 
-def get_batches(item_code: str | None = None, exp_date: date | None = None, obj: bool = False) -> list[dict] | list[Batch]:
+def get_batches(item_code: str | None = None, exp_date: date | None = None, obj: bool = False, exact: bool = False) -> list[dict] | list[Batch]:
     batches = session.query(Batch)
     if item_code is not None:
-        batches = batches.filter(Batch.item_code.contains(item_code))
+        if not exact:
+            batches = batches.filter(Batch.item_code.contains(item_code))
+        else:
+            batches = batches.filter(Batch.item_code == item_code)
     if exp_date is not None:
         batches = batches.filter(Batch.exp_date <= exp_date.replace(day=1))
     batches = batches.order_by(Batch.exp_date)
