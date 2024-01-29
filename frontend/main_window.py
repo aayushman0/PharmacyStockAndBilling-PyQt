@@ -417,11 +417,11 @@ class MainWindow(QMainWindow):
             return None
         current_text = re.sub('[^A-Za-z0-9 ]+', '', current_text).lower()
         item = get_item(code=current_text)
+        self.table_add_bill.cellWidget(row_no, 0).clear()
         if item is not None:
             self.table_add_bill.cellWidget(row_no, 0).addItem(item.name, item.code)
         else:
             current_text = current_text.split()
-            self.table_add_bill.cellWidget(row_no, 0).clear()
             for item in get_items(code_list=current_text):
                 self.table_add_bill.cellWidget(row_no, 0).addItem(item.get("name"), item.get("code"))
 
