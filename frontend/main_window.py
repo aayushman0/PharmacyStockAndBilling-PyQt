@@ -8,7 +8,8 @@ from PyQt6.QtWidgets import QAbstractSpinBox, QPushButton, QLineEdit
 from PyQt6.QtGui import QColor
 
 from backend import create_item, create_batch, create_item_and_batch, create_bill, create_service_bill
-from backend import get_items, get_batches, get_bills, get_service_bills, edit_item, edit_batch, delete_item, delete_batch
+from backend import get_item, get_items, get_batches, get_bills, get_service_bills
+from backend import edit_item, edit_batch, delete_item, delete_batch
 from .side_windows import show_message, BillWindow, ServiceBillWindow
 
 # For Type Hinting
@@ -173,7 +174,6 @@ class MainWindow(QMainWindow):
         # Get Batches Page
         self.button_batch_filter_reset.clicked.connect(self.batch_reset_button_clicked)
         self.input_batch_filter_code.currentTextChanged.connect(self.batch_filter_code_changed)
-        # self.input_batch_filter_code.activated.connect(self.batch_filter_code_entered)
         self.input_batch_filter_date.dateChanged.connect(self.batch_filter_date_changed)
 
         # Get All Bills Page
@@ -237,20 +237,6 @@ class MainWindow(QMainWindow):
         current_text = re.sub('[^A-Za-z0-9]+', '', current_text).lower()
         self.table_batch.setRowCount(0)
         for row in get_batches(item_code=current_text):
-            row_count = self.table_batch.rowCount()
-            self.table_batch.insertRow(row_count)
-            for i, column in enumerate(["batch_no", "name", "quantity", "price", "total", "mfg_date", "exp_date"]):
-                table_item = QTableWidgetItem(row.get(column))
-                if row.get("color") is not None:
-                    table_item.setBackground(QColor(*row.get("color")))
-                self.table_batch.setItem(row_count, i, table_item)
-        self.table_batch.resizeColumnsToContents()
-
-    def batch_filter_code_entered(self):
-        if not self.input_batch_filter_code.currentData():
-            return None
-        self.table_batch.setRowCount(0)
-        for row in get_batches(item_code=self.input_batch_filter_code.currentData()):
             row_count = self.table_batch.rowCount()
             self.table_batch.insertRow(row_count)
             for i, column in enumerate(["batch_no", "name", "quantity", "price", "total", "mfg_date", "exp_date"]):
@@ -347,6 +333,8 @@ class MainWindow(QMainWindow):
 
     def add_batch_button_clicked(self):
         code = self.input_item_code.currentText()
+        if get_item(code=code) is None:
+            return None
         batch_no = self.input_batch_no.text()
         quantity = self.input_quantity.value()
         price = self.input_batch_price.value()
@@ -387,10 +375,7 @@ class MainWindow(QMainWindow):
         cell_single_total = QDoubleSpinBox()
 
         # -------------------------------------------------------------------------------- #
-        # cell_particular.addItem(None, None)
         cell_particular.setEditable(True)
-        # for item in self.items_list:
-        #     cell_particular.addItem(item.get("name"), item.get("code"))
         # -------------------------------------------------------------------------------- #
         cell_mfg_date.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         cell_mfg_date.setReadOnly(True)
@@ -430,11 +415,15 @@ class MainWindow(QMainWindow):
         current_text = self.table_add_bill.cellWidget(row_no, 0).currentText()
         if not current_text:
             return None
-        current_text = re.sub('[^A-Za-z0-9 ]+', '', current_text).lower().split()
-
-        self.table_add_bill.cellWidget(row_no, 0).clear()
-        for item in get_items(code_list=current_text):
-            self.table_add_bill.cellWidget(row_no, 0).addItem(item.get("name"), item.get("code"))
+        current_text = re.sub('[^A-Za-z0-9 ]+', '', current_text).lower()
+        item = get_item(code=current_text)
+        if item is not None:
+            self.table_add_bill.cellWidget(row_no, 0).addItem(item.name, item.code)
+        else:
+            current_text = current_text.split()
+            self.table_add_bill.cellWidget(row_no, 0).clear()
+            for item in get_items(code_list=current_text):
+                self.table_add_bill.cellWidget(row_no, 0).addItem(item.get("name"), item.get("code"))
 
         code = self.table_add_bill.cellWidget(row_no, 0).currentData()
         if not code:
@@ -552,12 +541,12 @@ class MainWindow(QMainWindow):
     def edit_item_code_entered(self):
         if not self.input_edit_code.currentText():
             return None
-        response = get_items(code=self.input_edit_code.currentText())
+        response = get_item(code=self.input_edit_code.currentText())
         if not response:
             return None
-        self.input_edit_item_name.setText(response[0].get("name"))
-        self.input_edit_price.setValue(float(response[0].get("price")))
-        self.input_edit_lifecycle.setValue(int(response[0].get("life_cycle")))
+        self.input_edit_item_name.setText(response.name)
+        self.input_edit_price.setValue(float(response.price))
+        self.input_edit_lifecycle.setValue(int(response.life_cycle))
 
     def edit_item_saved(self):
         code = self.input_edit_code.currentData()
@@ -665,8 +654,6 @@ class MainWindow(QMainWindow):
     def reset_page_get_batches(self):
         self.reset_input_code_and_bill_table()
         self.input_batch_filter_code.addItem(None, None)
-        # for item in self.items_list:
-        #     self.input_batch_filter_code.addItem(item.get("code"), item.get("code"))
         self.input_batch_filter_date.setDate(QDate.currentDate())
         self.batch_reset_button_clicked()
 

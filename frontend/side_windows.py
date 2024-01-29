@@ -5,7 +5,7 @@ from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem
 from docx import Document
 
-from backend import get_bills, get_service_bills
+from backend import get_bill, get_service_bill
 
 # For Type Hinting
 from PyQt6 import QtWidgets
@@ -51,7 +51,7 @@ class BillWindow(QWidget):
         self.dda_no.setText(f'DDA No.: {env.get("DDA_NO")}')
 
     def load_bill(self):
-        bill = get_bills(id=self.bill_id)
+        bill = get_bill(id=self.bill_id)
         if bill is None:
             self.customer_name.setText("Name: Bill doesn't exist.")
             return None
@@ -184,7 +184,7 @@ class ServiceBillWindow(QWidget):
         self.dda_no.setText(f'DDA No.: {env.get("DDA_NO")}')
 
     def load_service_bill(self):
-        bill = get_service_bills(id=self.service_bill_id)
+        bill = get_service_bill(id=self.service_bill_id)
         if bill is None:
             self.customer_name.setText("Name: Bill doesn't exist.")
             return None

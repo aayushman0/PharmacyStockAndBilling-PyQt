@@ -8,10 +8,13 @@ from models import Item, Batch, Bill, ServiceBill
 from sqlalchemy import func
 
 
-def get_items(code: str | None = None, code_list: list | None = None) -> list[dict]:
+def get_item(code: str) -> Item | None:
+    item = session.query(Item).filter(Item.code == code).scalar()
+    return item
+
+
+def get_items(code_list: list | None = None) -> list[dict]:
     items = session.query(Item).order_by(Item.code)
-    if code is not None:
-        items = items.filter(Item.code.contains(code))
     if code_list is not None:
         for filter_code in code_list:
             items = items.filter(Item.code.contains(filter_code))
@@ -49,11 +52,12 @@ def get_batches(item_code: str | None = None, exp_date: date | None = None, obj:
     return response
 
 
-def get_bills(id: int | None = None, date: date | None = None) -> Bill | list[dict]:
-    if id is not None:
-        bill = session.query(Bill).filter(Bill.id == id).scalar()
-        return bill
+def get_bill(id: int) -> Bill | None:
+    bill = session.query(Bill).filter(Bill.id == id).scalar()
+    return bill
 
+
+def get_bills(date: date | None = None) -> list[dict]:
     if date is not None:
         bills = session.query(Bill).filter(func.DATE(Bill.bill_date) == date).order_by(Bill.bill_date.desc())
     else:
@@ -71,11 +75,12 @@ def get_bills(id: int | None = None, date: date | None = None) -> Bill | list[di
     return response
 
 
-def get_service_bills(id: int | None = None, date: date | None = None) -> ServiceBill | list[dict]:
-    if id is not None:
-        service_bill = session.query(ServiceBill).filter(ServiceBill.id == id).scalar()
-        return service_bill
+def get_service_bill(id: int) -> ServiceBill | None:
+    service_bill = session.query(ServiceBill).filter(ServiceBill.id == id).scalar()
+    return service_bill
 
+
+def get_service_bills(date: date | None = None) -> list[dict]:
     if date is not None:
         service_bills = session.query(ServiceBill).filter(func.DATE(ServiceBill.bill_date) == date).order_by(ServiceBill.bill_date.desc())
     else:
@@ -137,7 +142,7 @@ def create_bill(customer_name: str, bill_json: list[dict], total_amount: float, 
         batch = session.query(Batch).filter(Batch.batch_no == batch_no, Batch.item_code == item_code).scalar()
         if batch is None:
             continue
-        if batch.quantity < quantity:
+        if batch.quantity <= quantity:
             session.delete(batch)
         else:
             batch.quantity -= quantity
