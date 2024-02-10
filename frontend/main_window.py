@@ -416,7 +416,7 @@ class MainWindow(QMainWindow):
         if not current_text:
             return None
         current_text = re.sub('[^A-Za-z0-9 ]+', '', current_text).lower()
-        item = get_item(code=current_text)
+        item = get_item(code=current_text.replace(" ", ""))
         self.table_add_bill.cellWidget(row_no, 0).clear()
         if item is not None:
             self.table_add_bill.cellWidget(row_no, 0).addItem(item.name, item.code)
